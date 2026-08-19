@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2D vs 3D Shapes Class Quiz!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            overflow: hidden; /* Lock total scrolling */
+            font-family: 'Fredoka', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 12px 16px;
+            width: 98vw;
+            max-width: 1100px;
+            height: 96vh;
+            max-height: 98vh;
+            text-align: center;
+            border: 4px solid #FF9A9E;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: min(3.8vh, 2.1rem);
+            color: #FF5E7E;
+            text-shadow: 2px 2px 0px #FFD166;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        /* Floating Music Toggle Button */
+        .music-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: #FFD166;
+            border: 3px solid #F7B801;
+            border-radius: 50px;
+            padding: 4px 12px;
+            font-size: min(2.2vh, 0.95rem);
+            font-weight: 900;
+            color: #2E4057;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #D49B00;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .music-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #D49B00;
+        }
+
+        /* Fullscreen Start Screen Overlay for Immediate Audio Unlock */
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .start-title {
+            font-size: min(6vh, 3rem);
+            color: #FF5E7E;
+            text-shadow: 3px 3px 0px #FFD166;
+            margin-bottom: 15px;
+        }
+
+        .start-subtitle {
+            font-size: min(3vh, 1.4rem);
+            color: #4A4A4A;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: #FF007F;
+            border: 4px solid #C70062;
+            border-radius: 50px;
+            color: #FFFFFF;
+            font-size: min(4vh, 2rem);
+            font-weight: 900;
+            padding: 12px 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #99004B;
+            transition: transform 0.15s;
+            animation: pulse-start 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-start {
+            from { transform: scale(1); }
+            to { transform: scale(1.06); }
+        }
+
+        .btn-start:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 0 #99004B;
+        }
+
+        .slide-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            padding: 4px 0;
+        }
+
+        .instruction-box {
+            background: #FFE66D;
+            border: 2px dashed #FF6B6B;
+            border-radius: 12px;
+            padding: 4px 16px;
+            font-size: min(3vh, 1.5rem);
+            color: #2E4057;
+            font-weight: bold;
+            box-shadow: 0 3px 0 #F7B801;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .shapes-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            flex: 1;
+            align-items: center;
+            justify-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .shapes-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+        }
+
+        .shape-card {
+            background: #FFFFFF;
+            border: 3px solid #4ECDC4;
+            border-radius: 12px;
+            padding: 4px;
+            width: 100%;
+            height: 100%;
+            max-height: 16vh;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #45B7D1;
+            transition: transform 0.15s;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            background: #FF9F1C;
+            color: #FFF;
+            font-size: min(2vh, 1rem);
+            font-weight: 900;
+            width: min(3.5vh, 26px);
+            height: min(3.5vh, 26px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #FFF;
+            z-index: 2;
+        }
+
+        .shape-card svg {
+            width: 65%;
+            height: 65%;
+            margin-top: 2px;
+            flex: 1;
+        }
+
+        .shape-label {
+            margin-top: 1px;
+            font-size: min(2.4vh, 1.3rem) !important; 
+            font-weight: 900 !important;
+            color: #1A252C;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            width: 100%;
+            text-align: center;
+        }
+
+        .vanish {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.2);
+        }
+
+        .shake-red {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: #FF6B6B !important;
+            background-color: #FFD2D2 !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+            40%, 60% { transform: translate3d(5px, 0, 0); }
+        }
+
+        .btn-action {
+            background: #00F5D4;
+            border: 3px solid #00BB9B;
+            border-radius: 50px;
+            color: #1A535C;
+            font-size: min(3vh, 1.4rem);
+            font-weight: 900;
+            padding: 6px 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #00BB9B;
+            margin-top: 4px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .victory-screen {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .victory-emoji {
+            font-size: min(8vh, 4rem);
+            margin: 10px 0;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+
+        .audio-notice {
+            font-size: min(1.6vh, 0.8rem);
+            color: #777;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Overlay Start Screen for Immediate User Interaction -->
+        <div id="start-overlay" class="start-overlay">
+            <div class="start-title">🎮 Shapes Playground 🎮</div>
+            <div class="start-subtitle">Interactive 2D vs 3D Class Quiz</div>
+            <button class="btn-start" onclick="startGame()">▶ START GAME</button>
+        </div>
+
+        <!-- Floating Music Control -->
+        <button class="music-btn" id="music-toggle" onclick="toggleMusic()">
+            <span id="music-icon">🎵</span> <span id="music-text">Music ON</span>
+        </button>
+
+        <h1 class="header-title">🎮 Shapes Playground 🎮</h1>
+
+        <!-- Slide 1: Target 2D First -->
+        <div id="slide-1" class="slide-content">
+            <div class="instruction-box">👉 Click all <strong>2D Shapes</strong>!</div>
+            <div class="shapes-grid" id="grid-slide-1"></div>
+            <button id="btn-next" class="btn-action hidden" onclick="goToSlide2()">Next Level ➔</button>
+        </div>
+
+        <!-- Slide 2: Target 3D Second -->
+        <div id="slide-2" class="slide-content hidden">
+            <div class="instruction-box">👉 Click all <strong>3D Shapes</strong>!</div>
+            <div class="shapes-grid" id="grid-slide-2"></div>
+            <button id="btn-finish" class="btn-action hidden" onclick="goToVictory()">Finish Game 🏆</button>
+        </div>
+
+        <!-- Slide 3: Victory -->
+        <div id="victory-screen" class="victory-screen hidden">
+            <div class="victory-emoji">🌟 🏆 🎉</div>
+            <h2 style="font-size: min(5vh, 2.5rem); color: #7B2CBF; margin-bottom: 10px;">HOORAY! YOU DID IT! 🎉</h2>
+            <p style="font-size: min(3vh, 1.4rem); color: #4A4A4A; margin-bottom: 15px;">You found all 2D & 3D shapes! Amazing Job! 🎓✨</p>
+            <button class="btn-action" onclick="restartGame()">Play Again 🔄</button>
+        </div>
+
+        <div class="audio-notice">🔊 Touch or Click anywhere for sound & music</div>
+    </div>
+
+    <script>
+        // Web Audio API Engine
+        let audioCtx = null;
+        let bgMusicTimer = null;
+        let isMusicPlaying = false;
+        let musicMuted = false;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            return audioCtx;
+        }
+
+        // Background Music Generator
+        function playBGMStep(step) {
+            if (musicMuted) return;
+            const ctx = getAudioContext();
+            if (!ctx || ctx.state !== 'running') return;
+
+            const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+            const pattern = [0, 2, 4, 2, 3, 5, 4, 2, 1, 3, 5, 3, 2, 0, 4, 2];
+            const bassPattern = [130.81, 164.81, 196.00, 164.81];
+
+            const now = ctx.currentTime;
+
+            const noteFreq = notes[pattern[step % pattern.length]];
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(noteFreq, now);
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.2);
+
+            if (step % 4 === 0) {
+                const bassOsc = ctx.createOscillator();
+                const bassGain = ctx.createGain();
+                bassOsc.type = 'sine';
+                bassOsc.frequency.setValueAtTime(bassPattern[(step/4) % bassPattern.length], now);
+
+                bassGain.gain.setValueAtTime(0.12, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                bassOsc.connect(bassGain);
+                bassGain.connect(ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.32);
+            }
+        }
+
+        let currentStep = 0;
+        function startBGM() {
+            if (isMusicPlaying || musicMuted) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            if (ctx.state === 'suspended') {
+                ctx.resume().then(() => {
+                    isMusicPlaying = true;
+                    if (!bgMusicTimer) {
+                        bgMusicTimer = setInterval(() => {
+                            playBGMStep(currentStep);
+                            currentStep++;
+                        }, 220);
+                    }
+                });
+            } else {
+                isMusicPlaying = true;
+                if (!bgMusicTimer) {
+                    bgMusicTimer = setInterval(() => {
+                        playBGMStep(currentStep);
+                        currentStep++;
+                    }, 220);
+                }
+            }
+        }
+
+        function toggleMusic() {
+            musicMuted = !musicMuted;
+            const btnText = document.getElementById('music-text');
+            const btnIcon = document.getElementById('music-icon');
+            if (musicMuted) {
+                btnText.innerText = 'Music OFF';
+                btnIcon.innerText = '🔇';
+            } else {
+                btnText.innerText = 'Music ON';
+                btnIcon.innerText = '🎵';
+                startBGM();
+            }
+        }
+
+        function startGame() {
+            const ctx = getAudioContext();
+            if (ctx) {
+                ctx.resume().then(() => {
+                    const buffer = ctx.createBuffer(1, 1, 22050);
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(ctx.destination);
+                    source.start(0);
+
+                    startBGM();
+                });
+            }
+            document.getElementById('start-overlay').classList.add('hidden');
+        }
+
+        // Sound Effects (Correct / Wrong)
+        function playCorrectSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+
+        function playWrongSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.setValueAtTime(110, now + 0.15);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        }
+
+        // GRAND VICTORY / CHEERING SOUND EFFECT
+        function playVictorySound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            // 1. Victory Fanfare
+            const fanfareNotes = [523.25, 659.25, 783.99, 1046.50];
+            const times = [0, 0.12, 0.24, 0.4];
+            const durations = [0.1, 0.1, 0.12, 0.8];
+
+            fanfareNotes.forEach((freq, i) => {
+                const now = ctx.currentTime + times[i];
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + durations[i]);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + durations[i]);
+            });
+
+            // 2. Crowd Cheering & "YEY!" Sound Simulation
+            const cheerStart = ctx.currentTime + 0.3;
+            const cheerPitches = [350, 420, 500, 580, 650];
+            cheerPitches.forEach((p, idx) => {
+                const now = cheerStart + (idx * 0.05);
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(p, now);
+                osc.frequency.exponentialRampToValueAtTime(p * 1.6, now + 0.3);
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.45);
+            });
+
+            // Noise burst for applause
+            const bufferSize = ctx.sampleRate * 1.5;
+            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            const whiteNoise = ctx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1200, cheerStart);
+            filter.Q.setValueAtTime(1.2, cheerStart);
+
+            const cheerGain = ctx.createGain();
+            cheerGain.gain.setValueAtTime(0.01, cheerStart);
+            cheerGain.gain.linearRampToValueAtTime(0.25, cheerStart + 0.2);
+            cheerGain.gain.exponentialRampToValueAtTime(0.001, cheerStart + 1.5);
+
+            whiteNoise.connect(filter);
+            filter.connect(cheerGain);
+            cheerGain.connect(ctx.destination);
+
+            whiteNoise.start(cheerStart);
+            whiteNoise.stop(cheerStart + 1.5);
+        }
+
+        const colorPalettes = [
+            { main: '#FF5964', stroke: '#D62828', dark: '#B31B1B', light: '#FF8A93' },
+            { main: '#35A7FF', stroke: '#0077B6', dark: '#005689', light: '#70C1FF' },
+            { main: '#FFD166', stroke: '#F7B801', dark: '#C69200', light: '#FFE299' },
+            { main: '#06D6A0', stroke: '#059669', dark: '#046A4A', light: '#52EDC4' },
+            { main: '#A855F7', stroke: '#7E22CE', dark: '#5B1497', light: '#C084FC' },
+            { main: '#FF9F1C', stroke: '#E67E22', dark: '#B35900', light: '#FFBF69' },
+            { main: '#FF69B4', stroke: '#C71585', dark: '#8B008B', light: '#FFB6C1' },
+            { main: '#00F5D4', stroke: '#00BB9B', dark: '#00806A', light: '#80FAF0' }
+        ];
+
+        function getRandomColor() {
+            return colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
+        }
+
+        const shapeGenerators = {
+            square: () => {
+                const c = getRandomColor();
+                return { name: 'Square', type: '2D', svg: `<svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" rx="0" fill="${c.main}" stroke="${c.stroke}" stroke-width="4"/></svg>` };
+            },
+            circle: () => {
+                const c = getRandomColor();
+                return { name: 'Circle', type: '2D', svg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="${c.main}" stroke="${c.stroke}" stroke-width="4"/></svg>` };
+            },
+            triangle: () => {
+                const c = getRandomColor();
+                return { name: 'Triangle', type: '2D', svg: `<svg viewBox="0 0 100 100"><polygon points="50,12 88,82 12,82" fill="${c.main}" stroke="${c.stroke}" stroke-width="4" stroke-linejoin="miter"/></svg>` };
+            },
+            rectangle: () => {
+                const c = getRandomColor();
+                return { name: 'Rectangle', type: '2D', svg: `<svg viewBox="0 0 100 100"><rect x="10" y="25" width="80" height="50" rx="0" fill="${c.main}" stroke="${c.stroke}" stroke-width="4"/></svg>` };
+            },
+
+            cube: () => {
+                const c = getRandomColor();
+                return { name: 'Cube', type: '3D', svg: `<svg viewBox="0 0 100 100"><polygon points="50,15 80,30 50,45 20,30" fill="${c.light}" stroke="${c.dark}" stroke-width="2"/><polygon points="20,30 50,45 50,80 20,65" fill="${c.main}" stroke="${c.dark}" stroke-width="2"/><polygon points="50,45 80,30 80,65 50,80" fill="${c.dark}" stroke="${c.dark}" stroke-width="2"/></svg>` };
+            },
+            sphere: () => {
+                const c = getRandomColor();
+                const gradId = `sphereGrad_${Math.floor(Math.random()*1000000)}`;
+                return { name: 'Sphere', type: '3D', svg: `<svg viewBox="0 0 100 100"><defs><radialGradient id="${gradId}" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="${c.light}"/><stop offset="50%" stop-color="${c.main}"/><stop offset="100%" stop-color="${c.dark}"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="url(#${gradId})" stroke="${c.dark}" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="38" ry="14" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="4 3" opacity="0.95"/><ellipse cx="50" cy="50" rx="14" ry="38" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/></svg>` };
+            },
+            cylinder: () => {
+                const c = getRandomColor();
+                return { name: 'Cylinder', type: '3D', svg: `<svg viewBox="0 0 100 100"><rect x="25" y="25" width="50" height="50" fill="${c.main}" stroke="${c.dark}" stroke-width="2"/><ellipse cx="50" cy="75" rx="25" ry="10" fill="${c.dark}" stroke="${c.dark}" stroke-width="2"/><rect x="25.5" y="25" width="49" height="49" fill="${c.main}"/><ellipse cx="50" cy="25" rx="25" ry="10" fill="${c.light}" stroke="${c.dark}" stroke-width="2"/></svg>` };
+            }
+        };
+
+        let foundCount = 0;
+
+        function generateDeck(targetType) {
+            const targetKeys = targetType === '3D' ? ['cube', 'sphere', 'cylinder'] : ['square', 'circle', 'triangle', 'rectangle'];
+            const nonTargetKeys = targetType === '3D' ? ['square', 'circle', 'triangle', 'rectangle'] : ['cube', 'sphere', 'cylinder'];
+            let deck = [];
+            for (let i = 0; i < 10; i++) deck.push(shapeGenerators[targetKeys[i % targetKeys.length]]());
+            for (let i = 0; i < 10; i++) deck.push(shapeGenerators[nonTargetKeys[i % nonTargetKeys.length]]());
+            return deck.sort(() => Math.random() - 0.5);
+        }
+
+        function handleCardClick(card, item, targetType, onCorrect) {
+            if (card.classList.contains('vanish')) return;
+
+            if (item.type === targetType) {
+                playCorrectSound();
+                card.classList.add('vanish');
+                onCorrect();
+            } else {
+                playWrongSound();
+                card.classList.add('shake-red');
+                setTimeout(() => card.classList.remove('shake-red'), 400);
+            }
+        }
+
+        function createCard(item, cardNumber, targetType, onCorrect) {
+            const card = document.createElement('div');
+            card.className = 'shape-card';
+            card.innerHTML = `
+                <div class="card-number">${cardNumber}</div>
+                ${item.svg}
+                <div class="shape-label">${item.name}</div>
+            `;
+
+            card.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleCardClick(card, item, targetType, onCorrect);
+            });
+
+            card.addEventListener('click', () => {
+                handleCardClick(card, item, targetType, onCorrect);
+            });
+
+            return card;
+        }
+
+        function setupSlide(targetType) {
+            const slideId = targetType === '2D' ? '1' : '2';
+            const grid = document.getElementById(`grid-slide-${slideId}`);
+            const btn = document.getElementById(targetType === '2D' ? 'btn-next' : 'btn-finish');
+            grid.innerHTML = '';
+            foundCount = 0;
+            btn.classList.add('hidden');
+
+            const deck = generateDeck(targetType);
+            deck.forEach((item, index) => {
+                const card = createCard(item, index + 1, targetType, () => {
+                    foundCount++;
+                    if (foundCount === 10) {
+                        setTimeout(() => btn.classList.remove('hidden'), 300);
+                    }
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function goToSlide2() {
+            document.getElementById('slide-1').classList.add('hidden');
+            document.getElementById('slide-2').classList.remove('hidden');
+            setupSlide('3D');
+        }
+
+        function goToVictory() {
+            document.getElementById('slide-2').classList.add('hidden');
+            document.getElementById('victory-screen').classList.remove('hidden');
+            
+            // Trigger Grand Victory Fanfare & Cheering Effect
+            playVictorySound();
+        }
+
+        function restartGame() {
+            document.getElementById('victory-screen').classList.add('hidden');
+            document.getElementById('slide-1').classList.remove('hidden');
+            setupSlide('2D');
+        }
+
+        window.onload = () => setupSlide('2D');
+    </script>
+</body>
+</html>
